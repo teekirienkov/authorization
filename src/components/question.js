@@ -16,6 +16,24 @@ export class Question {
 		.then(Question.renderList)
 	}
 
+	static fetch(token) {
+		if (!token) {
+			return Promise.resolve('<p class="error">У вас нет токена</p>')
+		}
+
+		return fetch(`https://reglog-v6.firebaseio.com/questions.json?auth=${token}`)
+			.then(response => response.json())
+			.then(response => {
+				if (response && response.error) {
+					return `'<p class="error">${response.error}</p>'`
+				}
+
+				return response ? Object.keys(response).map(key => ({
+					...response[key],
+					id: key
+				})) : []
+			})
+	}
 	static renderList() {
 		const questions = getQuestionsFromLocalStorage();
 
@@ -26,6 +44,13 @@ export class Question {
 		const list = document.querySelector('#list');
 
 		list.innerHTML = html;
+	}
+	static listToHTML(questions) {
+		// Не работает из-за отсутствия плагина HTML для webpack
+		// return questions.length
+		// 	? `<ol>${questions.map(q => <li>${q.text}</li>).join('')}</ol>`
+		// 	: `<p>Вопросов пока нет</p>`
+		return questions.map(q => q.text).join('')
 	}
 }
 
